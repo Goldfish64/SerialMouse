@@ -36,15 +36,16 @@ IOService *SerialMouse::probe(IOService *provider, SInt32 *score) {
     
     // Create variables.
     IORS232SerialStreamSync *serialStream = (IORS232SerialStreamSync*)provider;
-    UInt32 origDataRate, origDataSize, origStopBits, origFlowControl;
-    IOService *returnService;
+    UInt32 origDataRate = 0, origDataSize = 0, origStopBits = 0, origFlowControl = 0;
+    IOService *returnService = NULL;
     
-    // Save original port settings.
-    if (getPortSettings(serialStream, &origDataRate, &origDataSize, &origStopBits, &origFlowControl) != kIOReturnSuccess)
+    // Acquire port.
+    if (acquirePort(serialStream) != kIOReturnSuccess)
         goto fail;
     
-    // Setup serial stream and check mouse ID.
-    if ((setupPort(serialStream) != kIOReturnSuccess) || (checkMouseId(serialStream) != kIOReturnSuccess))
+    // Save original port settings, setup stream, and check mouse ID
+    if ((getPortSettings(serialStream, &origDataRate, &origDataSize, &origStopBits, &origFlowControl) != kIOReturnSuccess) ||
+        (setupPort(serialStream) != kIOReturnSuccess) || (checkMouseId(serialStream) != kIOReturnSuccess))
         goto fail;
     
     // There is a serial mouse present, so we can match.
@@ -58,7 +59,7 @@ fail:
 done:
     // Close port and restore port settings.
     setPortSettings(serialStream, origDataRate, origDataSize, origStopBits, origFlowControl);
-    closePort(serialStream);
+    releasePort(serialStream);
     return returnService;
 }
 
@@ -67,21 +68,23 @@ bool SerialMouse::start(IOService *provider) {
     if (!super::start(provider))
         return false;
     
-    // Setup serial stream and check mouse ID.
+    // Acquire port, setup stream, and check mouse ID.
     serialStream = (IORS232SerialStreamSync*)provider;
-    if ((setupPort(serialStream) != kIOReturnSuccess) || (checkMouseId(serialStream) != kIOReturnSuccess))
+    if ((acquirePort(serialStream) != kIOReturnSuccess) || (setupPort(serialStream) != kIOReturnSuccess) ||
+        (checkMouseId(serialStream) != kIOReturnSuccess))
         goto fail;
     
     // Initialize polling thread.
-    if (kernel_thread_start(OSMemberFunctionCast(thread_continue_t, this, &SerialMouse::pollMouseThread), this, &pollThread) != kIOReturnSuccess)
+    if (kernel_thread_start(OSMemberFunctionCast(thread_continue_t, this, &SerialMouse::pollMouseThread),
+                            this, &pollThread) != kIOReturnSuccess)
         goto fail;
     
     // Driver started successfully.
     return true;
     
 fail:
-    DBGLOG("SerialMouse::start(): no mouse found\n");
-    closePort(serialStream);
+    DBGLOG("SerialMouse::start(): failed to start mouse\n");
+    releasePort(serialStream);
     return false;
 }
 
@@ -103,60 +106,38 @@ void SerialMouse::pollMouseThread(void) {
         UInt32 count = 0;
         
         // Read packet.
-        if ((serialStream->dequeueData(packet, MOUSE_PACKET_LENGTH, &count, MOUSE_PACKET_LENGTH) == kIOReturnSuccess) && count == MOUSE_PACKET_LENGTH) {
-            IOLog("Data %X %X %X\n", packet[0], packet[1], packet[2]);
+        if ((serialStream->dequeueData(packet, MOUSE_PACKET_LENGTH, &count, MOUSE_PACKET_LENGTH) == kIOReturnSuccess) &&
+            count == MOUSE_PACKET_LENGTH) {
+            DBGLOG("SerialMouse::pollMouseThread(): got packet %X %X %X\n",
+                   packet[0], packet[1], packet[2]);
             
             // If first byte is invalid, flush buffer.
             if (!MOUSE_PACKET_VALID(packet))
                 flushPort(serialStream);
-            else { // Packet is valid.
-                // TODO send to HID system here.
-                
+            else { // Packet is valid, send to HID system.
+                // Get current time.
                 uint64_t now_abs;
                 clock_get_uptime(&now_abs);
                 uint64_t now_ns;
                 absolutetime_to_nanoseconds(now_abs, &now_ns);
-                
-                // Determine buttons.
-                UInt32 buttons = 0;
-                if (MOUSE_PACKET_LEFTB(packet))
-                    buttons |= 1;
-                if (MOUSE_PACKET_RIGHTB(packet))
-                    buttons |= 2;
-                
+
                 // Dispatch pointer movement event.
-                dispatchRelativePointerEvent(MOUSE_PACKET_POSX(packet), MOUSE_PACKET_POSY(packet), buttons, *(AbsoluteTime*)&now_ns);
+                dispatchRelativePointerEvent(MOUSE_PACKET_POSX(packet), MOUSE_PACKET_POSY(packet),
+                                             MOUSE_PACKET_BUTTONS(packet), *(AbsoluteTime*)&now_ns);
             }
         }
     }
-    
 }
 
-IOReturn SerialMouse::setupPort(IORS232SerialStreamSync *serialStream) {
-    DBGLOG("SerialMouse::setupPort(): start\n");
-    IOReturn status;
+IOReturn SerialMouse::acquirePort(IORS232SerialStreamSync *serialStream) {
+    DBGLOG("SerialMouse::acquirePort(): start\n");
     
     // Acquire port.
-    status = serialStream->acquirePort(false);
-    if (status != kIOReturnSuccess)
-        return status;
-    
-    // Set up port.
-    status = setPortSettings(serialStream, MOUSE_DATA_RATE, MOUSE_DATA_SIZE, MOUSE_STOP_BITS, MOUSE_FLOW_CONTROL);
-    if (status != kIOReturnSuccess)
-        return status;
-    
-    // Activate port.
-    status = serialStream->executeEvent(PD_E_ACTIVE, true);
-    if (status != kIOReturnSuccess)
-        return status;
-    
-    // Success.
-    return kIOReturnSuccess;
+    return serialStream->acquirePort(false);
 }
 
-IOReturn SerialMouse::closePort(IORS232SerialStreamSync *serialStream) {
-    DBGLOG("SerialMouse::closePort(): start\n");
+IOReturn SerialMouse::releasePort(IORS232SerialStreamSync *serialStream) {
+    DBGLOG("SerialMouse::releasePort(): start\n");
     IOReturn status;
     
     // Deactivate port.
@@ -164,18 +145,21 @@ IOReturn SerialMouse::closePort(IORS232SerialStreamSync *serialStream) {
     if (status != kIOReturnSuccess)
         return status;
     
-    // Disable flow control.
-    status = serialStream->executeEvent(PD_E_FLOW_CONTROL, 0);
-    if (status != kIOReturnSuccess)
-        return status;
-    
     // Release port.
-    status = serialStream->releasePort();
+    return serialStream->releasePort();
+}
+
+IOReturn SerialMouse::setupPort(IORS232SerialStreamSync *serialStream) {
+    DBGLOG("SerialMouse::setupPort(): start\n");
+    IOReturn status;
+    
+    // Set up port.
+    status = setPortSettings(serialStream, MOUSE_DATA_RATE, MOUSE_DATA_SIZE, MOUSE_STOP_BITS, MOUSE_FLOW_CONTROL);
     if (status != kIOReturnSuccess)
         return status;
     
-    // Success.
-    return kIOReturnSuccess;
+    // Activate port.
+    return serialStream->executeEvent(PD_E_ACTIVE, true);
 }
 
 IOReturn SerialMouse::flushPort(IORS232SerialStreamSync *serialStream) {
@@ -222,13 +206,8 @@ IOReturn SerialMouse::checkMouseId(IORS232SerialStreamSync *serialStream) {
 
 IOReturn SerialMouse::getPortSettings(IORS232SerialStreamSync *serialStream, UInt32 *dataRate,
                          UInt32 *dataSize, UInt32 *stopBits, UInt32 *flowControl) {
-    DBGLOG("SerialMouse::getPortSettings(): start");
+    DBGLOG("SerialMouse::getPortSettings(): start\n");
     IOReturn status;
-    
-    // Acquire port.
-    status = serialStream->acquirePort(false);
-    if (status != kIOReturnSuccess)
-        return status;
     
     // Get port settings.
     status = serialStream->requestEvent(PD_E_DATA_RATE, dataRate);
@@ -240,21 +219,12 @@ IOReturn SerialMouse::getPortSettings(IORS232SerialStreamSync *serialStream, UIn
     status = serialStream->requestEvent(PD_RS232_E_STOP_BITS, stopBits);
     if (status != kIOReturnSuccess)
         return status;
-    status = serialStream->requestEvent(PD_E_FLOW_CONTROL, flowControl);
-    if (status != kIOReturnSuccess)
-        return status;
-    
-    // Release port.
-    status = serialStream->releasePort();
-    if (status != kIOReturnSuccess)
-        return status;
-    
-    // Success.
-    return kIOReturnSuccess;
+    return serialStream->requestEvent(PD_E_FLOW_CONTROL, flowControl);
 }
+
 IOReturn SerialMouse::setPortSettings(IORS232SerialStreamSync *serialStream, UInt32 dataRate,
                          UInt32 dataSize, UInt32 stopBits, UInt32 flowControl) {
-    DBGLOG("SerialMouse::setPortSettings(): start");
+    DBGLOG("SerialMouse::setPortSettings(): start\n");
     IOReturn status;
     
     // Get port settings.
@@ -267,10 +237,5 @@ IOReturn SerialMouse::setPortSettings(IORS232SerialStreamSync *serialStream, UIn
     status = serialStream->executeEvent(PD_RS232_E_STOP_BITS, stopBits);
     if (status != kIOReturnSuccess)
         return status;
-    status = serialStream->executeEvent(PD_E_FLOW_CONTROL, flowControl);
-    if (status != kIOReturnSuccess)
-        return status;
-    
-    // Success.
-    return kIOReturnSuccess;
+    return serialStream->executeEvent(PD_E_FLOW_CONTROL, flowControl);
 }

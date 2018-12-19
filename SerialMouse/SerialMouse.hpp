@@ -56,16 +56,31 @@
 
 #define MOUSE_POLL_DELAY_MS 100
 
+// HID buttons.
+#define HID_MOUSE_LEFTB     0x1
+#define HID_MOUSE_RIGHTB    0x2
+
+// Serial mouse packet format:
+//
+// 7  6  5  4  3  2  1  0
+// X  1  LB RB Y7 Y6 X7 X6
+// X  0  X5 X4 X3 X2 X1 X0
+// X  0  Y5 Y4 Y3 Y2 Y1 Y0
+//
+
+// Serial mouse packet stuff.
 #define MOUSE_PACKET_LENGTH     3
 #define MOUSE_PACKET_HEADER_BIT 0x40
 #define MOUSE_PACKET_LEFTB_BIT  0x20
 #define MOUSE_PACKET_RIGHTB_BIT 0x10
 
-#define MOUSE_PACKET_VALID(packet)  ((Boolean)(packet[0] & MOUSE_PACKET_HEADER_BIT))
-#define MOUSE_PACKET_LEFTB(packet)  ((Boolean)(packet[0] & MOUSE_PACKET_LEFTB_BIT))
-#define MOUSE_PACKET_RIGHTB(packet) ((Boolean)(packet[0] & MOUSE_PACKET_RIGHTB_BIT))
-#define MOUSE_PACKET_POSX(packet)   ((SInt8)((packet[1] & 0x3F) | ((packet[0] & 0x3) << 6)))
-#define MOUSE_PACKET_POSY(packet)   ((SInt8)((packet[2] & 0x3F) | ((packet[0] & 0xC) << 4)))
+#define MOUSE_PACKET_VALID(packet)      ((Boolean)(packet[0] & MOUSE_PACKET_HEADER_BIT))
+#define MOUSE_PACKET_LEFTB(packet)      ((Boolean)(packet[0] & MOUSE_PACKET_LEFTB_BIT))
+#define MOUSE_PACKET_RIGHTB(packet)     ((Boolean)(packet[0] & MOUSE_PACKET_RIGHTB_BIT))
+#define MOUSE_PACKET_BUTTONS(packet)    ((UInt32)((MOUSE_PACKET_LEFTB(packet) ? HID_MOUSE_LEFTB : 0) | \
+    (MOUSE_PACKET_RIGHTB(packet) ? HID_MOUSE_RIGHTB : 0)))
+#define MOUSE_PACKET_POSX(packet)       ((SInt8)((packet[1] & 0x3F) | ((packet[0] & 0x3) << 6)))
+#define MOUSE_PACKET_POSY(packet)       ((SInt8)((packet[2] & 0x3F) | ((packet[0] & 0xC) << 4)))
 
 // SerialMouseResources class. This is used to keep the kext in memory.
 class SerialMouseResources : IOService {
@@ -90,8 +105,9 @@ private:
     thread_t pollThread;
     void pollMouseThread(void);
     
+    static IOReturn acquirePort(IORS232SerialStreamSync *serialStream);
+    static IOReturn releasePort(IORS232SerialStreamSync *serialStream);
     static IOReturn setupPort(IORS232SerialStreamSync *serialStream);
-    static IOReturn closePort(IORS232SerialStreamSync *serialStream);
     static IOReturn flushPort(IORS232SerialStreamSync *serialStream);
     static IOReturn checkMouseId(IORS232SerialStreamSync *serialStream);
     
