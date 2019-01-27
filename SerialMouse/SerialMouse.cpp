@@ -70,8 +70,7 @@ bool SerialMouse::start(IOService *provider) {
     
     // Acquire port, setup stream, and check mouse ID.
     serialStream = (IORS232SerialStreamSync*)provider;
-    if ((acquirePort(serialStream) != kIOReturnSuccess) || (setupPort(serialStream) != kIOReturnSuccess) ||
-        (checkMouseId(serialStream) != kIOReturnSuccess))
+    if ((acquirePort(serialStream) != kIOReturnSuccess) || (setupPort(serialStream) != kIOReturnSuccess))
         goto fail;
     
     // Initialize polling thread.
