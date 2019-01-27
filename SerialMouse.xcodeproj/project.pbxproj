@@ -257,11 +257,11 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.0.1;
 				INFOPLIST_FILE = SerialMouse/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				MODULE_NAME = fish.goldfish64.SerialMouse;
-				MODULE_VERSION = 1.0.0;
+				MODULE_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = fish.goldfish64.SerialMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = kext;
@@ -273,11 +273,11 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.0.0;
+				CURRENT_PROJECT_VERSION = 1.0.1;
 				INFOPLIST_FILE = SerialMouse/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				MODULE_NAME = fish.goldfish64.SerialMouse;
-				MODULE_VERSION = 1.0.0;
+				MODULE_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = fish.goldfish64.SerialMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = kext;
