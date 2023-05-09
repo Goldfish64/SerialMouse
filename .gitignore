@@ -1,6 +1,8 @@
 .DS_Store
 DerivedData
-VoodooFloppy.kext
 xcuserdata
 project.xcworkspace
 build
+xcshareddata
+/MacKernelSDK
+/clang32
