@@ -353,6 +353,7 @@
 				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
 				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MODULE_VERSION = 1.0.1;
 				SDKROOT = macosx;
 				VALID_ARCHS = "x86_64 ACID32";
 			};
@@ -382,7 +383,6 @@
 				"MACOSX_DEPLOYMENT_TARGET[arch=ACID32]" = 10.4;
 				MARKETING_VERSION = "$(MODULE_VERSION)";
 				MODULE_NAME = fish.goldfish64.SerialMouse;
-				MODULE_VERSION = 1.0.1;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",
@@ -456,7 +456,6 @@
 				"MACOSX_DEPLOYMENT_TARGET[arch=ACID32]" = 10.4;
 				MARKETING_VERSION = "$(MODULE_VERSION)";
 				MODULE_NAME = fish.goldfish64.SerialMouse;
-				MODULE_VERSION = 1.0.1;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",
