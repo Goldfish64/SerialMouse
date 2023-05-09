@@ -8,12 +8,24 @@
 
 /* Begin PBXBuildFile section */
 		413B3F742A06EA6500A098A7 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 413B3F732A06EA6500A098A7 /* README.md */; };
+		413B3F7C2A09EC9300A098A7 /* package.tool in Resources */ = {isa = PBXBuildFile; fileRef = 413B3F7B2A09EC9300A098A7 /* package.tool */; };
 		419249FB21C9AD4D0078848B /* SerialMouse.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 419249FA21C9AD4D0078848B /* SerialMouse.hpp */; };
 		419249FD21C9AD4D0078848B /* SerialMouse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 419249FC21C9AD4D0078848B /* SerialMouse.cpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		413B3F792A09EC7D00A098A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 419249EE21C9AD4D0078848B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 419249F621C9AD4D0078848B;
+			remoteInfo = SerialMouse;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		413B3F732A06EA6500A098A7 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		413B3F7B2A09EC9300A098A7 /* package.tool */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = package.tool; sourceTree = "<group>"; };
 		419249F721C9AD4D0078848B /* SerialMouse.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SerialMouse.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		419249FA21C9AD4D0078848B /* SerialMouse.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SerialMouse.hpp; sourceTree = "<group>"; };
 		419249FC21C9AD4D0078848B /* SerialMouse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SerialMouse.cpp; sourceTree = "<group>"; };
@@ -54,6 +66,7 @@
 				419249FA21C9AD4D0078848B /* SerialMouse.hpp */,
 				419249FC21C9AD4D0078848B /* SerialMouse.cpp */,
 				419249FE21C9AD4D0078848B /* Info.plist */,
+				413B3F7B2A09EC9300A098A7 /* package.tool */,
 			);
 			path = SerialMouse;
 			sourceTree = "<group>";
@@ -71,6 +84,23 @@
 		};
 /* End PBXHeadersBuildPhase section */
 
+/* Begin PBXLegacyTarget section */
+		413B3F752A09EC6500A098A7 /* Package */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 413B3F782A09EC6600A098A7 /* Build configuration list for PBXLegacyTarget "Package" */;
+			buildPhases = (
+			);
+			buildToolPath = "${SRCROOT}/SerialMouse/package.tool";
+			dependencies = (
+				413B3F7A2A09EC7D00A098A7 /* PBXTargetDependency */,
+			);
+			name = Package;
+			passBuildSettingsInEnvironment = 1;
+			productName = Package;
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		419249F621C9AD4D0078848B /* SerialMouse */ = {
 			isa = PBXNativeTarget;
@@ -80,6 +110,7 @@
 				419249F321C9AD4D0078848B /* Sources */,
 				419249F421C9AD4D0078848B /* Frameworks */,
 				419249F521C9AD4D0078848B /* Resources */,
+				413B3F7D2A09ECCE00A098A7 /* Archive */,
 			);
 			buildRules = (
 			);
@@ -99,6 +130,10 @@
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = Goldfish64;
 				TargetAttributes = {
+					413B3F752A09EC6500A098A7 = {
+						CreatedOnToolsVersion = 14.2;
+						ProvisioningStyle = Automatic;
+					};
 					419249F621C9AD4D0078848B = {
 						CreatedOnToolsVersion = 10.1;
 						ProvisioningStyle = Manual;
@@ -117,6 +152,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				413B3F752A09EC6500A098A7 /* Package */,
 				419249F621C9AD4D0078848B /* SerialMouse */,
 			);
 		};
@@ -127,11 +163,33 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				413B3F7C2A09EC9300A098A7 /* package.tool in Resources */,
 				413B3F742A06EA6500A098A7 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		413B3F7D2A09ECCE00A098A7 /* Archive */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = Archive;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"${TARGET_BUILD_DIR}\"\n\nstrip -S \"${EXECUTABLE_PATH}\"\nif [ \"$CONFIGURATION\" == \"Release\" ]; then\n  strip -x -T \"${EXECUTABLE_PATH}\" &>/dev/null || strip -x \"${EXECUTABLE_PATH}\"\nfi\n\nif [ -z \"${OVERRIDE_PYTHON3}\" ]; then\n  # Use whatever is in PATH\n  OVERRIDE_PYTHON3=python3\nfi\n\nif [[ \"$ARCHS\" == *\"ACID32\"* ]]; then\n  \"${OVERRIDE_PYTHON3}\" ${SRCROOT}/clang32/fix-macho32 \"${EXECUTABLE_PATH}\" || exit 1\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		419249F321C9AD4D0078848B /* Sources */ = {
@@ -144,7 +202,51 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		413B3F7A2A09EC7D00A098A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 419249F621C9AD4D0078848B /* SerialMouse */;
+			targetProxy = 413B3F792A09EC7D00A098A7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		413B3F762A09EC6600A098A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		413B3F772A09EC6600A098A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		419249FF21C9AD4D0078848B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -407,6 +509,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		413B3F782A09EC6600A098A7 /* Build configuration list for PBXLegacyTarget "Package" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				413B3F762A09EC6600A098A7 /* Debug */,
+				413B3F772A09EC6600A098A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		419249F121C9AD4D0078848B /* Build configuration list for PBXProject "SerialMouse" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
