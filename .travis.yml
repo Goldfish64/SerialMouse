@@ -1,9 +1,0 @@
-language: cpp
-
-matrix:
-  include:
-  - os: osx
-    compiler: clang
-    script:
-      - xcodebuild -configuration Debug
-      - xcodebuild -configuration Release
