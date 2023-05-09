@@ -17,11 +17,6 @@ if [ "$1" != "" ]; then
   exit 0
 fi
 
-mkdir -p package/Tools || exit 1
-mkdir -p package/Kexts || exit 1
-
-cd package || exit 1
-
 # Xcode 10.2 build system seems to have a race condition between
 # dependency scheduling, and for some reason does not complete
 # the compilation of dependencies even though it should have been.
@@ -29,11 +24,6 @@ cd package || exit 1
 if [ ! -f ../libaistat.dylib ]; then
   sleep 5
 fi
-
-for kext in ../*.kext; do
-  echo "$kext"
-  cp -a "$kext" Kexts/ || exit 1
-done
 
 # Workaround Xcode 10 bug
 if [ "$CONFIGURATION" = "" ]; then
@@ -58,4 +48,4 @@ if [ "$CONFIGURATION" = "Release" ]; then
 fi
 
 archive="SerialMouse-${MODULE_VERSION}-$(echo $CONFIGURATION | tr /a-z/ /A-Z/).zip"
-zip -qry -FS ../"${archive}" * || exit 1
+zip -qry -FS "${archive}" * || exit 1
