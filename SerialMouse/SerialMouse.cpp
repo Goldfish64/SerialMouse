@@ -119,30 +119,49 @@ void SerialMouse::stop(IOService *provider) {
   //
   // Kill polling thread.
   //
+  releasePort();
   thread_terminate(_pollThread);
   thread_deallocate(_pollThread);
-  releasePort();
 
   super::stop(provider);
 }
 
 void SerialMouse::pollMouseThread(void) {
   DBGLOG("SerialMouse: Polling thread\n");
+  
+  UInt8 packetByte;
+  UInt32 count = 0;
+  UInt32 packetSequence = 0;
+  
+  UInt8 packet[MOUSE_PACKET_LENGTH];
+  
   while (true) {
-    UInt8 packet[MOUSE_PACKET_LENGTH];
-    UInt32 count = 0;
-
     //
-    // Read incoming packet.
+    // If serial stream is null, exit.
     //
-    if ((_serialStream->dequeueData(packet, MOUSE_PACKET_LENGTH, &count, MOUSE_PACKET_LENGTH) == kIOReturnSuccess)
-      && count == MOUSE_PACKET_LENGTH) {
-      DBGLOG("SerialMouse::pollMouseThread(): got packet %X %X %X\n", packet[0], packet[1], packet[2]);
-
-      // If first byte is invalid, flush buffer.
-      if (!MOUSE_PACKET_VALID(packet)) {
-        flushPort();
-      } else { // Packet is valid, send to HID system.
+    if (_serialStream == nullptr) {
+      break;
+    }
+    
+    //
+    // Read next byte. If the sync is off, need to get in sync first.
+    //
+    if (_serialStream->dequeueData(&packetByte, 1, &count, 1) == kIOReturnSuccess) {
+      DBGLOG("SerialMouse::pollMouseThread(): got packet byte %X seq %u\n", packetByte, packetSequence);
+      
+      //
+      // If we are expecting the first byte of the packet but did not receive it, discard byte.
+      //
+      if (packetByte & MOUSE_PACKET_HEADER_BIT) {
+        packetSequence = 0;
+      }
+      
+      packet[packetSequence] = packetByte;
+      packetSequence++;
+      
+      if (packetSequence >= MOUSE_PACKET_LENGTH) {
+        packetSequence = 0;
+        
         // Get current time.
         uint64_t now_abs;
         clock_get_uptime(&now_abs);
