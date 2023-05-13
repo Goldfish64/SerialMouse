@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		413B3F742A06EA6500A098A7 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 413B3F732A06EA6500A098A7 /* README.md */; };
 		413B3F7C2A09EC9300A098A7 /* package.tool in Resources */ = {isa = PBXBuildFile; fileRef = 413B3F7B2A09EC9300A098A7 /* package.tool */; };
 		419249FB21C9AD4D0078848B /* SerialMouse.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 419249FA21C9AD4D0078848B /* SerialMouse.hpp */; };
 		419249FD21C9AD4D0078848B /* SerialMouse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 419249FC21C9AD4D0078848B /* SerialMouse.cpp */; };
@@ -26,6 +25,7 @@
 /* Begin PBXFileReference section */
 		413B3F732A06EA6500A098A7 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		413B3F7B2A09EC9300A098A7 /* package.tool */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = package.tool; sourceTree = "<group>"; };
+		41896CAC2A0FEE3A00B0C828 /* Changelog.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Changelog.md; sourceTree = "<group>"; };
 		419249F721C9AD4D0078848B /* SerialMouse.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SerialMouse.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		419249FA21C9AD4D0078848B /* SerialMouse.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SerialMouse.hpp; sourceTree = "<group>"; };
 		419249FC21C9AD4D0078848B /* SerialMouse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SerialMouse.cpp; sourceTree = "<group>"; };
@@ -48,6 +48,7 @@
 			children = (
 				419249F921C9AD4D0078848B /* SerialMouse */,
 				419249F821C9AD4D0078848B /* Products */,
+				41896CAC2A0FEE3A00B0C828 /* Changelog.md */,
 				413B3F732A06EA6500A098A7 /* README.md */,
 			);
 			sourceTree = "<group>";
@@ -164,7 +165,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				413B3F7C2A09EC9300A098A7 /* package.tool in Resources */,
-				413B3F742A06EA6500A098A7 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
