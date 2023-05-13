@@ -29,7 +29,7 @@
 			<key>IOProbeScore</key>
 			<integer>5000</integer>
 			<key>IOProviderClass</key>
-			<string>IORS232SerialStreamSync</string>
+			<string>IOSerialStreamSync</string>
 		</dict>
 		<key>SerialMouseResources</key>
 		<dict>

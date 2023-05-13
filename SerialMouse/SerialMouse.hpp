@@ -15,6 +15,7 @@
 #include <IOKit/IOTimerEventSource.h>
 
 #include <IOKit/hidsystem/IOHIPointing.h>
+#include <IOKit/serial/IOSerialStreamSync.h>
 #include <IOKit/serial/IORS232SerialStreamSync.h>
 
 // Debug logging.
@@ -36,7 +37,7 @@
 #define MOUSE_STOP_BITS     (1 bits)
 #define MOUSE_FLOW_CONTROL  (PD_RS232_S_RTS | PD_RS232_S_DTR)
 #define MOUSE_ID_DELAY_MS   100
-#define MOUSE_ID_BYTE       0x4D
+#define MOUSE_ID_BYTE       0x4D // 'M'
 
 #define MOUSE_POLL_DELAY_MS 100
 
@@ -84,7 +85,7 @@ private:
   //
   // Serial stream.
   //
-  IORS232SerialStreamSync *_serialStream = nullptr;
+  IOSerialStreamSync *_serialStream = nullptr;
 
   //
   // Polling thread.
@@ -92,7 +93,7 @@ private:
   thread_t _pollThread = nullptr;
   void pollMouseThread();
 
-  IOReturn acquirePort(IORS232SerialStreamSync *serialStream);
+  IOReturn acquirePort(IOSerialStreamSync *serialStream);
   void releasePort();
   IOReturn setupPort();
   IOReturn flushPort();

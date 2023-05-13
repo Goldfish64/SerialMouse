@@ -18,7 +18,7 @@ IOService *SerialMouse::probe(IOService *provider, SInt32 *score) {
 
   IOReturn status;
   bool probed = false;
-  IORS232SerialStreamSync *serialStream = OSDynamicCast(IORS232SerialStreamSync, provider);
+  IOSerialStreamSync *serialStream = OSDynamicCast(IOSerialStreamSync, provider);
   UInt32 origDataRate = 0, origDataSize = 0, origStopBits = 0, origFlowControl = 0;
   
   if (serialStream == nullptr) {
@@ -71,7 +71,7 @@ bool SerialMouse::start(IOService *provider) {
 
   IOReturn status;
   bool started = false;
-  IORS232SerialStreamSync *serialStream = OSDynamicCast(IORS232SerialStreamSync, provider);
+  IOSerialStreamSync *serialStream = OSDynamicCast(IOSerialStreamSync, provider);
 
   if (serialStream == nullptr) {
     SYSLOG("SerialMouse: Provider is not a serial stream\n");
@@ -95,12 +95,6 @@ bool SerialMouse::start(IOService *provider) {
     status = setupPort();
     if (status != kIOReturnSuccess) {
       SYSLOG("SerialMouse: Failed to setup serial port during probe()\n");
-      break;
-    }
-
-    status = checkMouseId();
-    if (status != kIOReturnSuccess) {
-      SYSLOG("SerialMouse: Device on serial port is not a serial mouse\n");
       break;
     }
 
@@ -165,7 +159,7 @@ void SerialMouse::pollMouseThread(void) {
   }
 }
 
-IOReturn SerialMouse::acquirePort(IORS232SerialStreamSync *serialStream) {
+IOReturn SerialMouse::acquirePort(IOSerialStreamSync *serialStream) {
   DBGLOG("SerialMouse: Acquiring serial port\n");
 
   IOReturn status = serialStream->acquirePort(false);
